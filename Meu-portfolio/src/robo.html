@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedra, Papel ou Tesoura - Luta Contra o Robô</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #282c34;
+      color: #fff;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    #robot-rps-game {
+      background-color: #3b3f4a;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h2 {
+      color: #00FF05;
+    }
+
+    button {
+      font-size: 1.5rem;
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00FF05;
+      color: #333;
+    }
+
+    #robot-feedback {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="robot-rps-game">
+    <h2>Pedra, Papel ou Tesoura - Luta Contra o Robô</h2>
+    <p>Escolha sua arma e lute contra o robô!</p>
+    <button onclick="playGame('pedra')">🪨 Pedra</button>
+    <button onclick="playGame('papel')">📄 Papel</button>
+    <button onclick="playGame('tesoura')">✂️ Tesoura</button>
+    <p id="robot-feedback"></p>
+  </div>
+
+  <script>
+    function playGame(playerChoice) {
+      const choices = ['pedra', 'papel', 'tesoura'];
+      const robotChoice = choices[Math.floor(Math.random() * choices.length)];
+      const feedback = document.getElementById("robot-feedback");
+
+      if (playerChoice === robotChoice) {
+        feedback.textContent = `Empate! O robô também escolheu ${robotChoice}. Prepare-se para a próxima rodada!`;
+      } else if (
+        (playerChoice === 'pedra' && robotChoice === 'tesoura') ||
+        (playerChoice === 'papel' && robotChoice === 'pedra') ||
+        (playerChoice === 'tesoura' && robotChoice === 'papel')
+      ) {
+        feedback.textContent = `Vitória! Você usou ${playerChoice} e derrotou o robô, que escolheu ${robotChoice}.`;
+      } else {
+        feedback.textContent = `Derrota! O robô escolheu ${robotChoice} e venceu você. Tente outra vez!`;
+      }
+    }
+  </script>
+</body>
+</html>

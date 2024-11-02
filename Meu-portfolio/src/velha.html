@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo da Velha - Ninja Shadow</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #1c1c1c;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #76FF03;
+      text-shadow: 2px 2px 4px #333;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      grid-gap: 10px;
+      margin-top: 20px;
+    }
+    .cell {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.5em;
+      border-radius: 15px;
+      background-color: #333;
+      border: 2px solid #76FF03;
+      cursor: pointer;
+      transition: background-color 0.4s, box-shadow 0.4s;
+    }
+    .cell:hover {
+      background-color: #4CAF50;
+      box-shadow: 0 0 10px #76FF03;
+    }
+    .cell.x {
+      color: #FF3D00;
+    }
+    .cell.o {
+      color: #00E676;
+    }
+    .status {
+      margin-top: 20px;
+      font-size: 1.5em;
+      color: #FFEB3B;
+    }
+    .hidden {
+      display: none;
+    }
+    footer {
+      margin-top: auto;
+      padding: 20px;
+      text-align: center;
+      color: #76FF03;
+      font-size: 0.9em;
+    }
+    button {
+      background-color: #00E676;
+      border: none;
+      padding: 10px 20px;
+      color: #333;
+      font-size: 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #00C853;
+    }
+  </style>
+</head>
+<body>
+  <h1>Jogo da Velha - Ninja Shadow</h1>
+  <div class="board" id="board">
+    <div class="cell" data-index="0"></div>
+    <div class="cell" data-index="1"></div>
+    <div class="cell" data-index="2"></div>
+    <div class="cell" data-index="3"></div>
+    <div class="cell" data-index="4"></div>
+    <div class="cell" data-index="5"></div>
+    <div class="cell" data-index="6"></div>
+    <div class="cell" data-index="7"></div>
+    <div class="cell" data-index="8"></div>
+  </div>
+  <div class="status hidden" id="status"></div>
+  
+  <!-- Seleção de dificuldade -->
+  <div>
+    <h2>Selecione a dificuldade:</h2>
+    <button onclick="startGame('easy')">Fácil</button>
+    <button onclick="startGame('normal')">Normal</button>
+    <button onclick="startGame('hard')">Difícil</button>
+  </div>
+
+  <footer>
+    <button onclick="resetGame()">Jogar Novamente</button>
+    <p>© 2024 Ninja Shadow</p>
+  </footer>
+  
+  <script>
+    const boardElement = document.getElementById('board');
+    const statusElement = document.getElementById('status');
+    const cells = document.querySelectorAll('.cell');
+    let currentPlayer = 'x';
+    let board = ['', '', '', '', '', '', '', '', ''];
+    let gameOver = false;
+    let difficulty = 'normal';
+
+    const winningCombinations = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+
+    function checkWinner() {
+      for (const combination of winningCombinations) {
+        const [a, b, c] = combination;
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          return board[a];
+        }
+      }
+      return board.includes('') ? null : 'Empate';
+    }
+
+    function botMove() {
+      let availableMoves = board.map((value, index) => value === '' ? index : null).filter(v => v !== null);
+
+      if (difficulty === 'easy') {
+        // Jogada aleatória
+        return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+      } else if (difficulty === 'normal') {
+        // Evitar perder
+        for (let move of availableMoves) {
+          board[move] = 'o';
+          if (checkWinner() === 'o') {
+            return move;
+          }
+          board[move] = '';
+        }
+        return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+      } else {
+        // Jogada estratégica
+        for (let move of availableMoves) {
+          board[move] = 'o';
+          if (checkWinner() === 'o') {
+            return move;
+          }
+          board[move] = '';
+        }
+        for (let move of availableMoves) {
+          board[move] = 'x';
+          if (checkWinner() === 'x') {
+            board[move] = '';
+            return move;
+          }
+          board[move] = '';
+        }
+        return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+      }
+    }
+
+    function handleClick(event) {
+      const index = event.target.getAttribute('data-index');
+
+      if (board[index] !== '' || gameOver) {
+        return;
+      }
+
+      board[index] = currentPlayer;
+      event.target.classList.add(currentPlayer);
+      event.target.textContent = currentPlayer.toUpperCase();
+
+      const winner = checkWinner();
+
+      if (winner) {
+        statusElement.textContent = winner === 'Empate' ? 'Empate!' : `Jogador ${winner.toUpperCase()} venceu!`;
+        statusElement.classList.remove('hidden');
+        gameOver = true;
+      } else {
+        currentPlayer = currentPlayer === 'x' ? 'o' : 'x';
+        if (currentPlayer === 'o') {
+          const botIndex = botMove();
+          cells[botIndex].click();
+        }
+      }
+    }
+
+    function resetGame() {
+      board = ['', '', '', '', '', '', '', '', ''];
+      cells.forEach(cell => {
+        cell.textContent = '';
+        cell.classList.remove('x', 'o');
+      });
+      currentPlayer = 'x';
+      gameOver = false;
+      statusElement.textContent = '';
+      statusElement.classList.add('hidden');
+    }
+
+    function startGame(level) {
+      difficulty = level;
+      resetGame();
+    }
+
+    cells.forEach(cell => {
+      cell.addEventListener('click', handleClick);
+    });
+  </script>
+</body>
+</html>
